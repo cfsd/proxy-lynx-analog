@@ -31,8 +31,8 @@
 
 void callOnReceive(cluon::data::Envelope data){
     if (data.dataType() == static_cast<int32_t>(opendlv::proxy::VoltageReading::ID())) {
-        opendlv::proxy::VoltageReading t = cluon::extractMessage<opendlv::proxy::VoltageReading>(std::move(data));
-        std::cout << "Recieved Msg Pin " << data.senderStamp() << ": " << t.torque() << " " << std::endl;
+       // opendlv::proxy::VoltageReading t = cluon::extractMessage<opendlv::proxy::VoltageReading>(std::move(data));
+       // std::cout << "Recieved Msg Pin " << data.senderStamp() << ": " << t.torque() << " " << std::endl;
     }
 }
 
@@ -95,7 +95,7 @@ int32_t main(int32_t argc, char **argv) {
         using namespace std::literals::chrono_literals;
         // uint32_t count = 0;
         while (od4.isRunning()) {
-            std::this_thread::sleep_for(1s);
+            std::this_thread::sleep_for(30ms);
             analog.body(od4);
         }
     }
