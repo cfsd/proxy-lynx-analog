@@ -35,9 +35,11 @@ float Analog::decode(const std::string &data) noexcept {
     return temp;
 }
 
-Analog::Analog()
+Analog::Analog(bool verbose, uint32_t id)
     : m_conversionConst(1)
-    , m_debug(1)
+    , m_debug(verbose)
+    , m_bbbId(id)
+    , m_senderStampOffsetAnalog(id*1000+200)
     , m_pins()
 
 {
@@ -55,7 +57,7 @@ void Analog::body(cluon::OD4Session &od4)
       std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
       cluon::data::TimeStamp sampleTime = cluon::time::convert(tp);
 
-      int16_t senderStamp = (int16_t) pair.first;
+      int16_t senderStamp = (int16_t) pair.first + m_senderStampOffsetAnalog;
       opendlv::proxy::VoltageReading msg;
       msg.torque(pair.second);
       od4.send(msg, sampleTime, senderStamp);

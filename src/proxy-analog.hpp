@@ -33,7 +33,7 @@ class Analog {
     //Analog &operator=(Analog &&) = delete;
 
    public:
-    Analog();
+    Analog(bool verbose, uint32_t id);
     ~Analog();
 
    public:
@@ -48,6 +48,8 @@ class Analog {
     
     float m_conversionConst;
     bool m_debug;
+    uint32_t m_bbbId;
+    uint32_t m_senderStampOffsetAnalog;
     std::vector<uint16_t> m_pins;
 
 
