@@ -53,20 +53,60 @@ Analog::~Analog()
 void Analog::body(cluon::OD4Session &od4)
 {
     std::vector<std::pair<uint16_t, float>> reading = getReadings();
-    for (std::pair<uint16_t, float> const& pair : reading) {
-      std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-      cluon::data::TimeStamp sampleTime = cluon::time::convert(tp);
-
-      int16_t senderStamp = (int16_t) pair.first + m_senderStampOffsetAnalog;
-      opendlv::proxy::VoltageReading msg;
-      msg.torque(pair.second);
-      od4.send(msg, sampleTime, senderStamp);
-    }
     if(m_debug) {
-      std::cout << "[PROXY_ANALOG] ";
+      std::cout << "[PROXY_ANALOG_RAW] ";
       for (std::pair<uint16_t, float> const& pair : reading) {
         std::cout << "Pin " << pair.first << ": " << pair.second << " ";
       }
+      std::cout << std::endl;
+    }
+
+    if(m_debug) {
+          std::cout << "[PROXY_ANALOG-PARSED] ";
+    }
+    
+    for (std::pair<uint16_t, float> const& pair : reading) {
+      std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+      cluon::data::TimeStamp sampleTime = cluon::time::convert(tp);
+      int16_t senderStamp = (int16_t) pair.first + m_senderStampOffsetAnalog;
+
+      float value;
+
+      if(pair.first == m_analogPinSteerPosition){
+        value = pair.second/((float) m_analogConvSteerPosition)-((float) m_analogOffsetSteerPosition);
+      }else if(pair.first == m_analogPinEbsLine){
+        value = pair.second/((float) m_analogConvEbsLine)-((float) m_analogOffsetEbsLine);
+      }else if(pair.first == m_analogPinServiceTank){
+        value = pair.second/((float) m_analogConvServiceTank)-((float) m_analogOffsetServiceTank);
+      }else if(pair.first == m_analogPinEbsActuator){
+        value = pair.second/((float) m_analogConvEbsActuator)-((float) m_analogOffsetEbsActuator);
+      }else if(pair.first == m_analogPinPressureReg){
+        value = pair.second/((float) m_analogConvPressureReg)-((float) m_analogOffsetPressureReg);
+      }else if(pair.first == m_analogPinSteerPositionRack){
+        value = pair.second/((float) m_analogConvSteerPositionRack)-((float) m_analogOffsetSteerPositionRack);
+      }
+
+      if(pair.first == m_analogPinSteerPosition || pair.first == m_analogPinSteerPositionRack){
+        opendlv::proxy::GroundSteeringReading msgSteer;
+        msgSteer.groundSteering(value);
+        od4.send(msgSteer, sampleTime, senderStamp);
+      }else if(pair.first == m_analogPinEbsLine || pair.first == m_analogPinServiceTank || pair.first == m_analogPinEbsActuator || pair.first == m_analogPinPressureReg){
+        opendlv::proxy::PressureReading msgPressure;
+        msgPressure.pressure(value);
+        od4.send(msgPressure, sampleTime, senderStamp);
+      }else{
+        opendlv::proxy::VoltageReading msg;
+        msg.torque(pair.second);
+        od4.send(msg, sampleTime, senderStamp);
+      }
+
+      if(m_debug) {
+        std::cout << "Pin " << pair.first << ": " << value << " ";
+      }
+
+    }
+
+    if(m_debug) {
       std::cout << std::endl;
     }
 }
@@ -75,7 +115,7 @@ void Analog::body(cluon::OD4Session &od4)
 
 void Analog::setUp() 
 {
-  std::vector<std::string> pinsVecString = {"0", "1", "2", "3", "4", "5", "6"};
+  std::vector<std::string> pinsVecString = {"0", "1", "2", "3", "5", "6"};
 
   for(std::string const& str : pinsVecString) {
     m_pins.push_back(std::stoi(str));

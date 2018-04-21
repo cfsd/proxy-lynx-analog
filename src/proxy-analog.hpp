@@ -52,6 +52,28 @@ class Analog {
     uint32_t m_senderStampOffsetAnalog;
     std::vector<uint16_t> m_pins;
 
+    const uint16_t m_analogPinSteerPosition = 0;
+    const uint16_t m_analogPinEbsLine = 1;
+    const uint16_t m_analogPinServiceTank = 2;
+    const uint16_t m_analogPinEbsActuator = 3;
+    const uint16_t m_analogPinPressureReg = 5;
+    const uint16_t m_analogPinSteerPositionRack = 6;
+
+
+    const double m_analogConvSteerPosition = 80.38;
+    const double m_analogConvEbsLine = 1;
+    const double m_analogConvServiceTank = 1;
+    const double m_analogConvEbsActuator = 1;
+    const double m_analogConvPressureReg = 1;
+    const double m_analogConvSteerPositionRack = 80.86;
+
+    const double m_analogOffsetSteerPosition = 27.74;
+    const double m_analogOffsetEbsLine = 0;
+    const double m_analogOffsetServiceTank = 0;
+    const double m_analogOffsetEbsActuator = 0;
+    const double m_analogOffsetPressureReg = 0;
+    const double m_analogOffsetSteerPositionRack = 28.06;
+
 
 
 };
