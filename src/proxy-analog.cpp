@@ -29,12 +29,6 @@
 #include <ctime>
 #include <chrono>
 
-float Analog::decode(const std::string &data) noexcept {
-    std::cout << "Got data:" << data << std::endl;
-    float temp = std::stof(data);
-    return temp;
-}
-
 Analog::Analog(bool verbose, uint32_t id)
     : m_conversionConst(1)
     , m_debug(verbose)

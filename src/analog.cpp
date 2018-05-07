@@ -29,13 +29,6 @@
 #include <ctime>
 #include <chrono>
 
-void callOnReceive(cluon::data::Envelope data){
-    if (data.dataType() == static_cast<int32_t>(opendlv::proxy::VoltageReading::ID())) {
-       // opendlv::proxy::VoltageReading t = cluon::extractMessage<opendlv::proxy::VoltageReading>(std::move(data));
-       // std::cout << "Recieved Msg Pin " << data.senderStamp() << ": " << t.torque() << " " << std::endl;
-    }
-}
-
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{0};
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
@@ -47,29 +40,23 @@ int32_t main(int32_t argc, char **argv) {
     } else {
         const uint32_t ID{(commandlineArguments["id"].size() != 0) ? static_cast<uint32_t>(std::stoi(commandlineArguments["id"])) : 0};
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
-        const double FREQ{static_cast<double>(std::stof(commandlineArguments["freq"]))};
+        const float FREQ{std::stof(commandlineArguments["freq"])};
         std::cout << "Micro-Service ID:" << ID << std::endl;
 
         // Interface to a running OpenDaVINCI session.
         Analog analog(VERBOSE, ID);
 
-        cluon::data::Envelope data;
-        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"])),
-            [&data](cluon::data::Envelope &&envelope){
-                callOnReceive(envelope);
-                // IMPORTANT INTRODUCE A MUTEX
-                data = envelope;
-            }
-        };
-    
-        using namespace std::literals::chrono_literals;
-        std::chrono::system_clock::time_point threadTime = std::chrono::system_clock::now();
-        while (od4.isRunning()) {
-            std::this_thread::sleep_until(std::chrono::duration<double>(1/FREQ)+threadTime);
-            threadTime = std::chrono::system_clock::now();
+        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
+        auto atFrequency{[&od4, &analog]() -> bool
+        {            
             analog.body(od4);
-        }
+            return true;
+        }};
+
+        od4.timeTrigger(FREQ, atFrequency);
+
+
     }
     return retCode;
 }

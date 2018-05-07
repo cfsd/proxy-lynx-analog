@@ -37,7 +37,6 @@ class Analog {
     ~Analog();
 
    public:
-    float decode(const std::string &data) noexcept;
     void body(cluon::OD4Session &od4);
 
    private:
