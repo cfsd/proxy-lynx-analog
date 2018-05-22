@@ -60,16 +60,16 @@ class Analog {
 
 
     const double m_analogConvSteerPosition = 80.38;
-    const double m_analogConvEbsLine = 1;
-    const double m_analogConvServiceTank = 1;
-    const double m_analogConvEbsActuator = 1;
-    const double m_analogConvPressureReg = 1;
+    const double m_analogConvEbsLine = 378.5;
+    const double m_analogConvServiceTank = 377.6;
+    const double m_analogConvEbsActuator = 377.9;
+    const double m_analogConvPressureReg = 378.7;
     const double m_analogConvSteerPositionRack = 80.86;
 
     const double m_analogOffsetSteerPosition = 27.74;
-    const double m_analogOffsetEbsLine = 0;
-    const double m_analogOffsetServiceTank = 0;
-    const double m_analogOffsetEbsActuator = 0;
+    const double m_analogOffsetEbsLine = 0.11;
+    const double m_analogOffsetServiceTank = 0.11;
+    const double m_analogOffsetEbsActuator = 0.11;
     const double m_analogOffsetPressureReg = 0;
     const double m_analogOffsetSteerPositionRack = 28.06;
 
