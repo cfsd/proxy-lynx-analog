@@ -124,8 +124,8 @@ void Analog::tearDown()
 }
 
 std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
+  std::vector<std::pair<uint16_t, float>> reading;
   try{
-    std::vector<std::pair<uint16_t, float>> reading;
     for(uint16_t const pin : m_pins) {
       std::string filename = "/sys/bus/iio/devices/iio:device0/in_voltage" 
           + std::to_string(pin) + "_raw";
@@ -142,8 +142,8 @@ std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
       }
       file.close();
     }
-  } catch (...) {
-    std::cerr << "[PROXY_ANALOG_EXCEPT] Exception in getReadings" << std::endl;
+  } catch (std::exception &error) {
+    std::cerr << "[PROXY_ANALOG_EXCEPT] Exception in getReadings: " << error.what() << std::endl ;
   }
   return reading;
 }
