@@ -125,25 +125,42 @@ void Analog::tearDown()
 
 std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
   std::vector<std::pair<uint16_t, float>> reading;
-  try{
-    for(uint16_t const pin : m_pins) {
-      std::string filename = "/sys/bus/iio/devices/iio:device0/in_voltage" 
-          + std::to_string(pin) + "_raw";
-      std::ifstream file(filename, std::ifstream::in);
-      std::string line;
-      if(file.is_open()){
-        std::getline(file, line);
-        uint16_t rawReading = std::stoi(line);
-        reading.push_back(std::make_pair(pin, rawReading*m_conversionConst));
-      } else {
-        std::cerr << "[PROXY_ANALOG] Could not read from analog input. (pin: " << pin 
-            << ", filename: " << filename << ")" << std::endl;
-        reading.push_back(std::make_pair(pin, 0));
+  
+      for(uint16_t const pin : m_pins) {
+        bool except = false;
+        uint16_t rawReading = 5000;
+        do{
+          except = false;
+          std::string filename = "/sys/bus/iio/devices/iio:device0/in_voltage" 
+              + std::to_string(pin) + "_raw";
+          std::ifstream file(filename, std::ifstream::in);
+          std::string line;
+          if(file.is_open()){
+            std::getline(file, line);
+            rawReading = 5000;
+            if(line.size() != 0){
+                try{
+                  rawReading = std::stoi(line);
+                } catch (std::exception &error) {
+                  std::cerr << "[PROXY_ANALOG_EXCEPT] Exception in getReadings: " << error.what() << line << std::endl;
+                  except = true;
+                }
+            }else{
+              std::cerr << "[PROXY_ANALOG_FAULT] Fault in getReadings, line is: " << line << std::endl;
+              except = true;
+            }
+          } else {
+          std::cerr << "[PROXY_ANALOG] Could not read from analog input. (pin: " << pin 
+              << ", filename: " << filename << ")" << std::endl;
+          reading.push_back(std::make_pair(pin, 0));
+          }
+        file.close();
+        }while(except);
+        if(rawReading != 5000)
+          reading.push_back(std::make_pair(pin, rawReading*m_conversionConst));
+
+        
       }
-      file.close();
-    }
-  } catch (std::exception &error) {
-    std::cerr << "[PROXY_ANALOG_EXCEPT] Exception in getReadings: " << error.what() << std::endl ;
-  }
+
   return reading;
 }
