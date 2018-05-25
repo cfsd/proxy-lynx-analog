@@ -35,6 +35,7 @@ Analog::Analog(bool verbose, uint32_t id)
     , m_bbbId(id)
     , m_senderStampOffsetAnalog(id*1000+200)
     , m_pins()
+    , m_analogValueFileIn()
 
 {
 	Analog::setUp();
@@ -117,10 +118,25 @@ void Analog::setUp()
   for(std::string const& str : pinsVecString) {
     m_pins.push_back(std::stoi(str));
   }
+
+  for (auto pin : m_pins) {
+      std::string analogValueFilename = "/sys/bus/iio/devices/iio:device0/in_voltage" + std::to_string(pin) + "_raw";
+      m_analogValueFileIn[pin] = new std::ifstream(analogValueFilename, std::fstream::in);
+
+    if (!(*m_analogValueFileIn[pin]).is_open()) {
+      std::cout << "[ANALOG] Could not open " << analogValueFilename << "." << std::endl;
+    }
+  }
+
 }
 
 void Analog::tearDown() 
 {
+    for (auto pin : m_pins) {
+    if ((*m_analogValueFileIn[pin]).is_open()) {
+      (*m_analogValueFileIn[pin]).close();
+    }
+  }
 }
 
 std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
@@ -131,12 +147,12 @@ std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
         uint16_t rawReading = 5000;
         do{
           except = false;
-          std::string filename = "/sys/bus/iio/devices/iio:device0/in_voltage" 
-              + std::to_string(pin) + "_raw";
-          std::ifstream file(filename, std::ifstream::in);
           std::string line;
-          if(file.is_open()){
-            std::getline(file, line);
+          if((*m_analogValueFileIn[pin]).is_open()){
+            (*m_analogValueFileIn[pin]).sync();
+            (*m_analogValueFileIn[pin]).seekg(0);
+            std::getline((*m_analogValueFileIn[pin]), line);
+
             rawReading = 5000;
             if(line.size() != 0){
                 try{
@@ -150,11 +166,9 @@ std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
               except = true;
             }
           } else {
-          std::cerr << "[PROXY_ANALOG] Could not read from analog input. (pin: " << pin 
-              << ", filename: " << filename << ")" << std::endl;
-          reading.push_back(std::make_pair(pin, 0));
+            std::cerr << "[PROXY_ANALOG] Could not read from analog input. (pin: " << pin << ")" << std::endl;
+            reading.push_back(std::make_pair(pin, 0));
           }
-        file.close();
         }while(except);
         if(rawReading != 5000)
           reading.push_back(std::make_pair(pin, rawReading*m_conversionConst));

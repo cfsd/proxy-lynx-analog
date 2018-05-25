@@ -50,6 +50,7 @@ class Analog {
     uint32_t m_bbbId;
     uint32_t m_senderStampOffsetAnalog;
     std::vector<uint16_t> m_pins;
+    std::map<int, std::ifstream*> m_analogValueFileIn;
 
     const uint16_t m_analogPinSteerPosition = 0;
     const uint16_t m_analogPinEbsLine = 1;
