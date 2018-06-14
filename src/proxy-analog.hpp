@@ -74,8 +74,6 @@ class Analog {
     const double m_analogOffsetPressureReg = 0;
     const double m_analogOffsetSteerPositionRack = 28.06;
 
-
-
 };
 
 #endif

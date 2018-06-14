@@ -127,7 +127,6 @@ void Analog::setUp()
       std::cout << "[ANALOG] Could not open " << analogValueFilename << "." << std::endl;
     }
   }
-
 }
 
 void Analog::tearDown() 
