@@ -81,18 +81,20 @@ void Analog::body(cluon::OD4Session &od4)
           value = pair.second/((float) m_analogConvSteerPositionRack)-((float) m_analogOffsetSteerPositionRack);
         }
 
-        if(pair.first == m_analogPinSteerPosition || pair.first == m_analogPinSteerPositionRack){
-          opendlv::proxy::GroundSteeringReading msgSteer;
-          msgSteer.groundSteering(value);
-          od4.send(msgSteer, sampleTime, senderStamp);
-        }else if(pair.first == m_analogPinEbsLine || pair.first == m_analogPinServiceTank || pair.first == m_analogPinEbsActuator || pair.first == m_analogPinPressureReg){
-          opendlv::proxy::PressureReading msgPressure;
-          msgPressure.pressure(value);
-          od4.send(msgPressure, sampleTime, senderStamp);
-        }else{
-          opendlv::proxy::VoltageReading msg;
-          msg.torque(pair.second);
-          od4.send(msg, sampleTime, senderStamp);
+        if(m_bbbId == 1){
+          if(pair.first == m_analogPinSteerPosition || pair.first == m_analogPinSteerPositionRack){
+            opendlv::proxy::GroundSteeringReading msgSteer;
+            msgSteer.groundSteering(value);
+            od4.send(msgSteer, sampleTime, senderStamp);
+          }else if(pair.first == m_analogPinEbsLine || pair.first == m_analogPinServiceTank || pair.first == m_analogPinEbsActuator || pair.first == m_analogPinPressureReg){
+            opendlv::proxy::PressureReading msgPressure;
+            msgPressure.pressure(value);
+            od4.send(msgPressure, sampleTime, senderStamp);
+          }else{
+            opendlv::proxy::VoltageReading msg;
+            msg.torque(pair.second);
+            od4.send(msg, sampleTime, senderStamp);
+          }
         }
 
         if(m_debug) {
@@ -114,6 +116,9 @@ void Analog::body(cluon::OD4Session &od4)
 void Analog::setUp() 
 {
   std::vector<std::string> pinsVecString = {"0", "1", "2", "3", "5", "6"};
+
+  m_pins.clear();
+  m_analogValueFileIn.clear();
 
   for(std::string const& str : pinsVecString) {
     m_pins.push_back(std::stoi(str));
@@ -161,12 +166,17 @@ std::vector<std::pair<uint16_t, float>> Analog::getReadings() {
                   except = true;
                 }
             }else{
-              std::cerr << "[PROXY_ANALOG_FAULT] Fault in getReadings, line is: " << line << std::endl;
+              std::cerr << "[PROXY_ANALOG_FAULT] Fault in getReadings (pin: " << pin << "), " << "line is: <" << line <<  ">" << std::endl;
               except = true;
             }
           } else {
             std::cerr << "[PROXY_ANALOG] Could not read from analog input. (pin: " << pin << ")" << std::endl;
             reading.push_back(std::make_pair(pin, 0));
+          }
+          if (except){
+            std::cerr << "[PROXY_ANALOG_EXCEPT] Trying to close and reopening file..." << std::endl;
+            tearDown();
+            setUp();
           }
         }while(except);
         if(rawReading != 5000)
