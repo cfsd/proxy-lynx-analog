@@ -72,7 +72,7 @@ class Analog {
     const double m_analogOffsetServiceTank = 0.11;
     const double m_analogOffsetEbsActuator = 0.11;
     const double m_analogOffsetPressureReg = 0;
-    const double m_analogOffsetSteerPositionRack = 28.06;
+    const double m_analogOffsetSteerPositionRack = 26.76; //Previously 28.06
 
 };
 
