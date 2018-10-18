@@ -1,3 +1,32 @@
+# Analog
+
+Collect the data from the Beaglebone then boardcast them.
+
+|   Data collect    |  PIN  | conversion | Offset |
+|-------------------|-------|------------|--------|
+| SteerPosition     |   0   |    80.38   | 27.74  |
+| EbsLine           |   1   |    378.5   | 0.11   |
+| ServiceTank       |   2   |    377.6   | 0.11   |
+| EbsActuator       |   3   |    377.9   | 0.11   |
+| PressureReg       |   5   |    378.7   | 0      |
+| SteerPositionRack |   6   |    80.86   | 28.06  |
+
+
+
+The media of connection with hardware interface is the file :
+
+```cpp
+/sys/bus/iio/devices/iio:device0/in_voltage" + std::to_string(pin) + "_raw"
+```
+
+## usage
+
+```cpp
+    cluon::OD4Session od4Dan{static_cast<uint16_t>(std::stoi(commandlineArguments["cidDan"]))};
+    
+    od4Dan.dataTrigger(opendlv::proxy::GroundSteeringReading::ID(),rackEnvelope);
+```
+
 ## OpenDLV Microservice for Beaglebone
 
 This repository provides source code for beaglebones for the OpenDLV.io software ecosystem.

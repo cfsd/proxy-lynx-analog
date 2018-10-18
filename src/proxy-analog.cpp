@@ -66,7 +66,7 @@ void Analog::body(cluon::OD4Session &od4)
         int16_t senderStamp = (int16_t) pair.first + m_senderStampOffsetAnalog;
 
         float value;
-
+        //select the value by name 
         if(pair.first == m_analogPinSteerPosition){
           value = pair.second/((float) m_analogConvSteerPosition)-((float) m_analogOffsetSteerPosition);
         }else if(pair.first == m_analogPinEbsLine){
@@ -80,7 +80,7 @@ void Analog::body(cluon::OD4Session &od4)
         }else if(pair.first == m_analogPinSteerPositionRack){
           value = pair.second/((float) m_analogConvSteerPositionRack)-((float) m_analogOffsetSteerPositionRack);
         }
-
+        //boradcast the value
         if(pair.first == m_analogPinSteerPosition || pair.first == m_analogPinSteerPositionRack){
           opendlv::proxy::GroundSteeringReading msgSteer;
           msgSteer.groundSteering(value);
